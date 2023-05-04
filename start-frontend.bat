@@ -1,0 +1,1 @@
+start /D frontend start-dev.bat
