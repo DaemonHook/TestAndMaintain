@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__, template_folder="../frontend/dist",
-            static_folder="../frontend/dist/static")
+            static_folder="../frontend/dist/assets")
 
 
 @app.route('/')

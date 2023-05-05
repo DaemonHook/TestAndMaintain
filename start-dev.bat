@@ -1,1 +1,1 @@
-start /d frontend cmd /k "set NODE_OPTIONS=--openssl-legacy-provider & npm run dev"
+start /d frontend cmd /k "npm run dev"
