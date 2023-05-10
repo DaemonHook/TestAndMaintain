@@ -22,7 +22,7 @@ cluster_infos = [NodeInfo(c['ip'], c['masterName'])
                  for c in origin_data['clusters']]
 
 
-class IndexData:
+class PartitionData:
     def __init__(self, index: str, shard: int, prirep: str, state: str, docs: int, store: int,
                  ip: str, node: str) -> None:
         self.index = index
@@ -41,6 +41,8 @@ class IndexData:
         return self.__str__()
 
 
-index_datas = [IndexData(i['index'], int(i['shard']), i['prirep'], i['state'],
+partition_infos = [PartitionData(i['index'], int(i['shard']), i['prirep'], i['state'],
                          int(i['docs']), fszCvtr.human2bytes(i['store']), i['ip'], i['node'])
                for i in origin_data['partitions']]
+
+print(partition_infos)
