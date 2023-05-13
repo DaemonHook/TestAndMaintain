@@ -1,0 +1,214 @@
+{
+    "nodes": [
+        {
+            "ip": "27.19.50.143",
+            "masterName": "master-data-01"
+        },
+        {
+            "ip": "27.19.50.143",
+            "masterName": "data-node-04"
+        },
+        {
+            "ip": "27.19.50.144",
+            "masterName": "master-data-02"
+        },
+        {
+            "ip": "27.19.50.144",
+            "masterName": "data-node-05"
+        },
+        {
+            "ip": "27.19.50.145",
+            "masterName": "data-node-06"
+        },
+        {
+            "ip": "27.19.50.145",
+            "masterName": "master-data-03"
+        },
+        {
+            "ip": "27.19.50.146",
+            "masterName": "data-node-07"
+        }
+    ],
+    "partitions": [
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 0,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 209263163,
+            "store": "17.7gb",
+            "ip": "27.19.50.143",
+            "node": "data-node-04"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 2,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 210796453,
+            "store": "18gb",
+            "ip": "27.19.50.143",
+            "node": "data-node-04"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 0,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 75834353,
+            "store": "8.7gb",
+            "ip": "27.19.50.144",
+            "node": "data-node-05"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 2,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 75839244,
+            "store": "880mb",
+            "ip": "27.19.50.144",
+            "node": "data-node-05"
+        },
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 2,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 209265988,
+            "store": "17.8gb",
+            "ip": "27.19.50.144",
+            "node": "data-node-05"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 2,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 210796453,
+            "store": "18gb",
+            "ip": "27.19.50.144",
+            "node": "data-node-05"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 1,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 210802493,
+            "store": "18gb",
+            "ip": "27.19.50.144",
+            "node": "data-node-05"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 2,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 75839244,
+            "store": "880mb",
+            "ip": "27.19.50.145",
+            "node": "data-node-06"
+        },
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 1,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 209272698,
+            "store": "18.6gb",
+            "ip": "27.19.50.145",
+            "node": "data-node-06"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 0,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 210792640,
+            "store": "17.9gb",
+            "ip": "27.19.50.145",
+            "node": "data-node-06"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 1,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 210802493,
+            "store": "18gb",
+            "ip": "27.19.50.145",
+            "node": "data-node-06"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 1,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 75852165,
+            "store": "8.7gb",
+            "ip": "27.19.50.143",
+            "node": "master-data-01"
+        },
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 1,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 209272698,
+            "store": "17.8gb",
+            "ip": "27.19.50.143",
+            "node": "master-data-01"
+        },
+        {
+            "index": "es_taig_key_20220626",
+            "shard": 0,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 210792640,
+            "store": "17.9gb",
+            "ip": "27.19.50.143",
+            "node": "master-data-01"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 1,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 75852165,
+            "store": "8.7gb",
+            "ip": "27.19.50.144",
+            "node": "master-data-02"
+        },
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 0,
+            "prirep": "p",
+            "state": "STARTED",
+            "docs": 209263163,
+            "store": "17.7gb",
+            "ip": "27.19.50.144",
+            "node": "master-data-02"
+        },
+        {
+            "index": "es_taig_key_20220624",
+            "shard": 0,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 75834353,
+            "store": "8.7gb",
+            "ip": "27.19.50.145",
+            "node": "master-data-03"
+        },
+        {
+            "index": "es_taig_key_20220625",
+            "shard": 2,
+            "prirep": "r",
+            "state": "STARTED",
+            "docs": 209265988,
+            "store": "17.8gb",
+            "ip": "27.19.50.145",
+            "node": "master-data-03"
+        }
+    ]
+}

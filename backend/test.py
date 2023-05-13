@@ -1,2 +1,0 @@
-import DataParser
-print(DataParser.cluster_infos)
