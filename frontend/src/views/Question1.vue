@@ -119,23 +119,23 @@ const GetIndexSymbolData = (x, y, name, label, color, onclick) => {
 /*
 NodeInfo: {
     node: {masterName, ip}
-    partitions: [节点上所有分片]
+    shards: [节点上所有分片]
 }
 */
 function NodeInfo(node) {
     this.node = node
-    this.partitions = []
+    this.shards = []
 }
 
 /*
 IndexInfo: {
     name: 索引名称
-    partitions: [节点上所有分片]
+    shards: [节点上所有分片]
 }
 */
 function IndexInfo(indexName) {
     this.name = indexName
-    this.partitions = []
+    this.shards = []
     this.color = '#000000'
 }
 
@@ -156,19 +156,19 @@ export default {
         return {
             tableData: [],
             nodes: [],
-            partitions: [],
+            shards: [],
             nodeInfoDict: new Map(),    // key: masterName, value: nodeInfo
             indexInfoDict: new Map()    // key: indexName, value: indexInfo
         }
     },
     mounted() {
-        // TODO: 这里应该请求后端
-        this.axios.get('./data.json').then(res => {
-            console.log(res.data)
-            this.nodes = res.data.nodes
-            this.partitions = res.data.partitions
-            console.log('nodes', this.nodes)
-            console.log('partitions', this.partitions)
+        this.api.get('./data').then(res => {
+            // console.log(res)
+            // console.log(res.data)
+            this.nodes = res.nodes
+            this.shards = res.shards
+            // console.log('nodes', this.nodes)
+            // console.log('shards', this.shards)
             this.BuildMap()
             this.InitChart()
         })
@@ -179,19 +179,19 @@ export default {
             this.nodes.forEach((node) => {
                 this.nodeInfoDict.set(node.masterName, new NodeInfo(node, []))
             })
-            this.partitions.forEach((partition) => {
+            this.shards.forEach((partition) => {
                 let nodeInfo = this.nodeInfoDict.get(partition.node)
                 if (nodeInfo === undefined) {
                     console.error('buildMap: Invalid Node name:', partition.node)
                 }
-                nodeInfo.partitions.push(partition)
+                nodeInfo.shards.push(partition)
                 if (!this.indexInfoDict.has(partition.index)) {
                     this.indexInfoDict.set(partition.index, new IndexInfo(partition.index))
                 }
-                this.indexInfoDict.get(partition.index).partitions.push(partition)
+                this.indexInfoDict.get(partition.index).shards.push(partition)
             })
-            console.log('nodeInfoDict:', this.nodeInfoDict)
-            console.log('indexInfoDict', this.indexInfoDict)
+            // console.log('nodeInfoDict:', this.nodeInfoDict)
+            // console.log('indexInfoDict', this.indexInfoDict)
         },
         // 生成echarts绘图中的data
         GetDataList() {
@@ -207,7 +207,7 @@ export default {
                 let node = nodeInfo.node
                 dataList.push(GetNodeSymbolData(curX, nodeSymbolY, GetNodeInnerName(nodeInfo.node),
                     'ES Node' + i, () => { this.OnNodeClick(node) }))
-                nodeInfo.partitions.forEach((partition) => {
+                nodeInfo.shards.forEach((partition) => {
                     partitionSet.add(partition)
                 })
                 curX += nodeSymbolGap
@@ -247,7 +247,7 @@ export default {
             // 添加partition到node的箭头
             this.nodeInfoDict.forEach((nodeInfo) => {
                 let nodeInnerName = GetNodeInnerName(nodeInfo.node)
-                nodeInfo.partitions.forEach((partition) => {
+                nodeInfo.shards.forEach((partition) => {
                     let partitionInnerName = GetPartitionInnerName(partition)
                     linkList.push({
                         source: partitionInnerName,
@@ -259,7 +259,7 @@ export default {
 
             this.indexInfoDict.forEach((indexInfo) => {
                 let indexInnerName = indexInfo.name
-                indexInfo.partitions.forEach((partition) => {
+                indexInfo.shards.forEach((partition) => {
                     let partitionInnerName = GetPartitionInnerName(partition)
                     linkList.push({
                         source: partitionInnerName,
@@ -275,7 +275,7 @@ export default {
             this.chart = echarts.init(this.$refs.chart)
             let dataList = this.GetDataList()
             let linkList = this.GetLinkList()
-            console.log('dataList:', dataList)
+            // console.log('dataList:', dataList)
             let option = {
                 title: { text: '分片统计' },
                 series: {
@@ -305,22 +305,22 @@ export default {
         },
         OnNodeClick(node) {
             this.tableData = []
-            console.log('OnNodeClick:', node);
-            let partitions = this.nodeInfoDict.get(node.masterName).partitions
-            console.log('partitions:', partitions)
-            partitions.forEach(partition => {
+            // console.log('OnNodeClick:', node);
+            let shards = this.nodeInfoDict.get(node.masterName).shards
+            // console.log('shards:', shards)
+            shards.forEach(partition => {
                 this.tableData.push(partition)
             })
         },
         OnPartitionClick(partition) {
             this.tableData = [partition]
-            console.log('OnPartitionClick:', partition)
+            // console.log('OnPartitionClick:', partition)
         },
         OnIndexClick(indexName) {
             this.tableData = []
-            console.log('OnIndexClick:', indexName)
-            let partitions = this.indexInfoDict.get(indexName).partitions
-            partitions.forEach(partition => {
+            // console.log('OnIndexClick:', indexName)
+            let shards = this.indexInfoDict.get(indexName).shards
+            shards.forEach(partition => {
                 this.tableData.push(partition)
             })
         }

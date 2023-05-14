@@ -1,1 +1,2 @@
-start /d backend cmd /k "..\venv\Scripts\python.exe -m flask run"
+start /d backend cmd /k "flask run"
+start /d frontend cmd /k "npm run dev"

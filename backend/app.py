@@ -1,61 +1,27 @@
 from flask import Flask, jsonify, request, render_template
+from flask_cors import CORS
+from DataLoader import *
+from Algo import *
 
-app = Flask(__name__, template_folder="../frontend/dist",
-            static_folder="../frontend/dist/assets")
+app = Flask(__name__)
 
-
-@app.route('/')
-@app.route('/index')
-def index():
-    return render_template('index.html')
-
-# app.config['JSON_AS_ASCII'] = False
+CORS(app)
 
 
-# @app.route("/user/login", methods=["POST"])
-# def user_login():
-#     """
-#     用户登录
-#     :return:
-#     """
-#     data = request.get_json()
-#     userName = data.get("userName")
-#     password = data.get("password")
-#     if userName == "admin" and password == "123456":
-#         return jsonify({
-#             "code": 0,
-#             "data": {
-#                 "token": "666666"
-#             }
-#         })
-#     else:
-#         return jsonify({
-#             "code": 99999999,
-#             "msg": "用户名或密码错误"
-#         })
+@app.route('/data')
+def get_data():
+    return origin_data
 
 
-# @app.route("/user/info", methods=["GET", "POST"])
-# def user_info():
-#     """
-#     获取当前用户信息
-#     :return:
-#     """
-#     token = request.headers.get("token")
-#     if token == "666666":
-#         return jsonify({
-#             "code": 0,
-#             "data": {
-#                 "id": "1",
-#                 "userName": "admin",
-#                 "realName": "张三",
-#                 "userType": 1
-#             }
-#         })
-#     return jsonify({
-#         "code": 99990403,
-#         "msg": "token不存在或已过期"
-#     })
+@app.route('/transfer', methods=['GET'])
+def get_transfer():
+    threshold = int(request.args.get('threshold'))
+    if threshold <= 0:
+        AutoSetShardThreshold()
+    else:
+        NODE_SHARD_THRESHOLD = threshold
+    return GetTransferList(originState)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

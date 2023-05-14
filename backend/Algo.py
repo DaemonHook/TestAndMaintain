@@ -34,7 +34,7 @@ class Shard:
         return self.sto < other.sto
 
     def __repr__(self) -> str:
-        return f'<index: {self.index}, self.shard: {self.shard}, self.prirep: {self.prirep}>'
+        return f'<index: {self.index}, shard: {self.shard}>'
 
 
 class Node:
@@ -57,7 +57,7 @@ class Node:
         self.subshards.append(subshard)
 
     def __repr__(self) -> str:
-        return f'<masterName: {self.name}, ip: {self.ip} subshards: {str(self.subshards)}>'
+        return f'<{self.name}>'
 
     def shardCount(self) -> int:
         return len(self.subshards)
@@ -70,7 +70,8 @@ def AutoSetShardThreshold():
     """
     自动设置分片阈值
     """
-    SHARD_THRESHOLD = math.ceil(len(shardInfos) / len(nodeInfos))
+    global NODE_SHARD_THRESHOLD
+    NODE_SHARD_THRESHOLD = math.ceil(len(shardInfos) / len(nodeInfos))
 
 
 class State:
@@ -119,26 +120,30 @@ originState = State(nodeInfos, shardInfos)
 
 
 def GetTransferList(state: State) -> list[dict]:
+    print('threshold:', NODE_SHARD_THRESHOLD)
     state = copy.deepcopy(state)
     # 转出集合
-    outset = set(filter(lambda node: node.shardCount() >
+    outNodeSet = set(filter(lambda node: node.shardCount() >
                  NODE_SHARD_THRESHOLD,  state.nodeDict.values()))
     # 转入集合
-    inset = set(filter(lambda node: node.shardCount() <
+    inNodeSet = set(filter(lambda node: node.shardCount() <
                 NODE_SHARD_THRESHOLD,  state.nodeDict.values()))
 
-    print('inset:', inset)
-    print('outset:', outset)
+    print('inset:', inNodeSet)
+    print('outset:', outNodeSet)
 
     transferList = []
 
-    while len(outset) > 0 and len(inset) > 0:
-        outNode = outset.pop()
-        print('outNode:', outNode)
-        inNodeList = list(inset)
+    while len(outNodeSet) > 0 and len(inNodeSet) > 0:
+        outNode = outNodeSet.pop()
+        # print('after pop outset: ', outNodeSet)
+        # print('outNode:', outNode)
+        # print()
+        # print()
+        inNodeList = list(inNodeSet)
         # print('inNodeList:', inNodeList)
         for inNode in inNodeList:
-            print('inNode:', inNode)
+            # print('inNode:', inNode)
             shard = state.getAvailableTransferShard(outNode, inNode)
             if shard is not None:
                 state.transferShard(shard, inNode)
@@ -147,12 +152,17 @@ def GetTransferList(state: State) -> list[dict]:
                     'to': inNode.data,
                     'shard': shard.data
                 })
+                # print(f'outNode: {outNode}, size: {outNode.shardCount()}')
                 if outNode.shardCount() > NODE_SHARD_THRESHOLD:
-                    outset.add(outNode)
+                    # print(f'outNode.shardCount(): {outNode.shardCount()}, NODE_SHARD_THRESHOLD: {NODE_SHARD_THRESHOLD}')
+                    outNodeSet.add(outNode)
                 if inNode.shardCount() >= NODE_SHARD_THRESHOLD:
-                    inset.remove(inNode)
-
+                    inNodeSet.remove(inNode)
+                # print('after transfer:')
+                # print('inset:', inNodeSet)
+                # print('outset:', outNodeSet)
+                break
     return transferList
 
 
-print('transferList:', GetTransferList(originState))
+# print('transferList:', GetTransferList(originState))
