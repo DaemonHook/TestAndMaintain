@@ -1,7 +1,7 @@
 <template>
   <div class="common-layout">
-    <el-container style="min-height: 1080px; ">
-      <el-aside width="200px" style="background-color: #E6E8EB;">
+    <el-container>
+      <el-aside width="200px">
         <el-menu router :default-active="this.$route.path">
           <el-menu-item index="/q1" class="aside-menu-item">第一题</el-menu-item>
           <el-menu-item index="/q2" class="aside-menu-item">第二题</el-menu-item>

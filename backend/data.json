@@ -1,5 +1,5 @@
 {
-    "clusters": [
+    "nodes": [
         {
             "ip": "27.19.50.143",
             "masterName": "master-data-01"
@@ -29,7 +29,7 @@
             "masterName": "data-node-07"
         }
     ],
-    "partitions": [
+    "shards": [
         {
             "index": "es_taig_key_20220625",
             "shard": 0,
