@@ -1,10 +1,10 @@
 <template>
     <div class="chart-border">
-        <div class="chart" ref="chart" style="height: 500px;"></div>
+        <div class="chart" ref="chart" style="height: 400px;"></div>
     </div>
     <div style="display: flex; flex-direction: row; width: 100%;">
-        <div style="width: 40%; height: 400px; display: flex; flex-direction: column; justify-content: flex-start;">
-            <el-text class="mx-1" size="large" style="margin-top: 10px;">{{ BM_name }}被分配的虚拟机</el-text>
+        <div style="width: 40%; height: 300px; display: flex; flex-direction: column; justify-content: flex-start;">
+            <el-text class="mx-1" size="large" style="margin-top: 10px;">物理机&nbsp;{{ BM_name }}&nbsp;被分配的虚拟机</el-text>
             <el-table :data="curBMData" style="width: 100%; margin-top: 10px;">
                 <el-table-column prop="name" label="名称">
                 </el-table-column>
@@ -16,21 +16,28 @@
                 </el-table-column>
             </el-table>
         </div>
-        <div style="width: 60%; height: 400px; display: flex; flex-direction: column;">
+        <div style="width: 60%; height: 300px; display: flex; flex-direction: column;">
             <el-text class="mx-1" size="large" style="margin-top: 10px; margin-bottom: 10px;">物理机状态</el-text>
             <el-row style="display: flex; flex-direction: row;">
                 <!-- <el-col> -->
-                <el-statistic title="存储 (G)" :value="BM_storage"/>
+                <el-statistic title="存储 (G)" :value="BM_storage" />
                 <!-- </el-col> -->
                 <!-- <el-col> -->
                 <el-statistic title="CPU大小 (个)" :value="BM_cpu_num">
                 </el-statistic>
                 <!-- </el-col> -->
                 <!-- <el-col> -->
-                <el-statistic title="内存大小 (G)" :value="BM_memory"/>
+                <el-statistic title="内存大小 (G)" :value="BM_memory" />
                 <!-- </el-col> -->
             </el-row>
-            <Panel></Panel>
+            <div style="display: flex; flex-direction: row; margin-top: 20px;">
+                <Panel :rate="100 - 100 * BM_storage_rem / BM_storage" panel-name="存储占用率"
+                    :numerator="BM_storage - BM_storage_rem" :denominator="BM_storage" style="flex: 1"></Panel>
+                <Panel :rate="100 - 100 * BM_cpu_num_rem / BM_cpu_num" panel-name="CPU占用率"
+                    :numerator="BM_cpu_num - BM_cpu_num_rem" :denominator="BM_cpu_num" style="flex: 1"></Panel>
+                <Panel :rate="100 - 100 * BM_memory_rem / BM_memory" panel-name="内存占用率"
+                    :numerator="BM_memory - BM_memory_rem" :denominator="BM_memory" style="flex: 1"></Panel>
+            </div>
         </div>
     </div>
 </template>
@@ -38,14 +45,13 @@
 <script>
 
 import * as echarts from 'echarts'
-import randomColor from 'randomcolor'
 import Panel from './Panel.vue'
 
 const BMSymbolGap = 150
 const VMSymbolRadius = 50
 const BMSymbolSize = 50
 const VMSymbolSize = 15
-const BMSymbolLineLength = 7
+const BMSymbolLineLength = 8
 
 const CreateBMSymbolData = (x, y, BM, onclick) => {
     return {
@@ -68,7 +74,7 @@ const CreateBMSymbolData = (x, y, BM, onclick) => {
     }
 }
 
-const CreateVMSymbolData = (x, y, VM, onclick) => {
+const CreateVMSymbolData = (x, y, VM) => {
     return {
         type: 'VM',
         name: VM.name,
@@ -81,7 +87,6 @@ const CreateVMSymbolData = (x, y, VM, onclick) => {
             borderColor: '#ffffff40',
             borderWidth: 3
         },
-        onclick,
     }
 }
 
@@ -90,10 +95,13 @@ export default {
         return {
             best_schedule: [],
             BM_name: "",
-            BM_storage: "-",
-            BM_cpu_num: "-",
-            BM_memory: "-"
-            // curBMData: {}
+            BM_storage: 1,
+            BM_storage_rem: 1,
+            BM_cpu_num: 1,
+            BM_cpu_num_rem: 1,
+            BM_memory: 1,
+            BM_memory_rem: 1,
+            curBMData: []
         };
     },
     mounted() {
@@ -125,14 +133,16 @@ export default {
             let nodes = [];
             let i = 0, j = 0;
             this.BM_dict.forEach(BM => {
-                nodes.push(CreateBMSymbolData(i * BMSymbolGap, j * BMSymbolGap, BM, () => { this.OnNodeClick(BM); }));
+                nodes.push(CreateBMSymbolData(i * BMSymbolGap, j * BMSymbolGap, BM,
+                    () => { this.RefreshData(BM); }));
                 let angle = 0;
                 let angleInc = 0;
                 if (BM.vm_list.length > 0) {
                     angleInc = 2 * Math.PI / BM.vm_list.length;
                 }
                 BM.vm_list.forEach(VM => {
-                    nodes.push(CreateVMSymbolData(i * BMSymbolGap + VMSymbolRadius * Math.cos(angle), j * BMSymbolGap + VMSymbolRadius * Math.sin(angle), VM, () => { this.OnNodeClick(VM); }));
+                    nodes.push(CreateVMSymbolData(i * BMSymbolGap + VMSymbolRadius * Math.cos(angle),
+                        j * BMSymbolGap + VMSymbolRadius * Math.sin(angle), VM))
                     angle += angleInc;
                 });
                 i++;
@@ -143,15 +153,32 @@ export default {
             });
             return nodes;
         },
+        GetLinks() {
+            let links = []
+            this.BM_dict.forEach(BM => {
+                BM.vm_list.forEach(VM => {
+                    links.push({
+                        source: VM.name,
+                        target: BM.name,
+                        lineStyle: { width: 2 }
+                    })
+                })
+            })
+            return links
+        },
         InitChart() {
             this.chart = echarts.init(this.$refs.chart);
             let option = {
                 title: { text: "虚拟机分配" },
+                // tooltip: {},
                 series: {
                     type: "graph",
                     layout: "none",
                     roam: true,
+                    edgeSymbol: ['circle', 'circle'],
+                    edgeSymbolSize: 1,
                     data: this.GetNodes(),
+                    links: this.GetLinks(),
                 }
             };
             option && this.chart.setOption(option);
@@ -163,8 +190,23 @@ export default {
                 }
             });
         },
-        OnNodeClick(node) {
-            console.log(node);
+        RefreshData(BM) {
+            this.BM_name = BM.name
+            this.BM_cpu_num = BM.cpu_num
+            this.BM_cpu_num_rem = BM.cpu_num_rem
+            this.BM_memory = BM.memory
+            this.BM_memory_rem = BM.memory_rem
+            this.BM_storage = BM.storage
+            this.BM_storage_rem = BM.storage_rem
+            this.curBMData = []
+            BM.vm_list.forEach(VM => {
+                this.curBMData.push({
+                    name: VM.name,
+                    storage: VM.storage,
+                    cpu_num: VM.cpu_num,
+                    memory: VM.memory
+                })
+            })
         }
     },
     components: { Panel }

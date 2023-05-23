@@ -1,6 +1,8 @@
 <template>
-    <div class="titleDiv"></div>
-    <div id="customGaugeContainer" ref="panel" style="height: 250px; width: 250px;"></div>
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div class="titleDiv" style="text-align: center;">{{ panelName }}</div>
+        <div id="customGaugeContainer" ref="panel" style="height: 125px; width: 125px;"></div>
+    </div>
 </template>
 
 <script>
@@ -30,10 +32,24 @@ export default {
     name: 'SmartSchedulingSystemCustomGauge',
     props: {
         rate: {
-            type: Number
+            type: Number,
+            default: 0
         },
         timeChange: {
-            type: Number
+            type: Number,
+            default: 3
+        },
+        panelName: {
+            type: String,
+            default: "Name"
+        },
+        denominator: {
+            type: Number,
+            default: 1
+        },
+        numerator: {
+            type: Number,
+            default: 1
         }
     },
 
@@ -62,14 +78,14 @@ export default {
         this.$nextTick(() => {
             this.initChart();
             // console.log(window)
-            window.addEventListener('resize', this.myChart.resize());
+            // window.addEventListener('resize', this.myChart.resize());
             // this.setScheduledTask();
         })
     },
 
     methods: {
         initChart() {
-            let dom = document.getElementById('customGaugeContainer');
+            let dom = this.$refs.panel;
             let clientHeight = dom.clientHeight;
             // console.log("clientHeight:" + clientHeight)
             _outerRadius = (clientHeight / 2) * 0.9;
@@ -105,7 +121,11 @@ export default {
                     //100可以看成是百分比
                     source: [[1, this.rate]]
                 },
-                tooltip: {},
+                tooltip: {
+                    formatter: () => {
+                        return `${this.numerator} / ${this.denominator}`
+                    }
+                },
                 angleAxis: {
                     type: 'value',
                     startAngle: 0,
@@ -270,8 +290,4 @@ function makeText(valOnRadian) {
 </script>
 
 <style lang="scss" scoped>
-#customGaugeContainer {
-    // height: calc(100% - 20px);
-    height: 100%;
-}
 </style>
