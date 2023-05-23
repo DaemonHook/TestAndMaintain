@@ -3,11 +3,9 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "./assets/main.css"
 import App from "./App.vue";
-import Test from "./Test.vue"
 import router from "./router";
 import service from "./service";
-// const app = createApp(App);
-const app = createApp(Test);
+const app = createApp(App);
 
 app.use(router);
 app.use(ElementPlus);

@@ -27,6 +27,12 @@ def create_BM(name: str, storage: int, cpu_num: int, memory: int) -> dict:
     }
 
 
+def copy_BM(BM: dict) -> dict:
+    cp = BM.copy()
+    cp['vm_list'] = BM['vm_list'].copy()
+    return cp
+
+
 def create_VM(name: str, storage: int, cpu_num: int, memory: int) -> dict:
     return {
         'type': 'VM',
@@ -38,6 +44,10 @@ def create_VM(name: str, storage: int, cpu_num: int, memory: int) -> dict:
 
 
 def add_VM(BM: dict, VM: dict) -> bool:
+    """
+    将VM分配给BM
+    return: True 如果分配成功 否则 False
+    """
     if BM['storage_rem'] >= VM['storage'] and BM['cpu_num_rem'] >= VM['cpu_num']\
             and BM['memory_rem'] >= VM['memory']:
         BM['vm_list'].append(VM)
@@ -58,6 +68,7 @@ for line in BM_df.values:
     # print(name, storage, cpu_num, memory)
     BM_list_origin.append(create_BM(name, storage, cpu_num, memory))
 
+
 VM_list_origin = []
 for line in VM_df.values:
     name = line[0]
@@ -66,9 +77,17 @@ for line in VM_df.values:
     memory = line[3]
     VM_list_origin.append(create_VM(name, storage, cpu_num, memory))
 
-
 # print(BM_list)
 # print(VM_list)
+
+
+def copy_VM_list(VM_list: list[dict]) -> list[dict]:
+    return [VM for VM in VM_list]
+
+
+def copy_BM_list(BM_list: list[dict]) -> list[dict]:
+    return [copy_BM(BM) for BM in BM_list]
+
 
 def depatch_VM(BM_list: list[dict], VM_list: list[dict]) -> bool:
     """
@@ -76,12 +95,14 @@ def depatch_VM(BM_list: list[dict], VM_list: list[dict]) -> bool:
 
     return: True if VM_list are all assigned else False
     """
-    i = 0
+    if len(BM_list) == 0:
+        return False
     for VM in VM_list:
-        if i >= len(BM_list):
-            return False
-        if not add_VM(BM_list[i], VM):
-            i += 1
+        j = 0
+        while add_VM(BM_list[j], VM) == False:
+            j += 1
+            if j >= len(BM_list):
+                return False
     return True
 
 
@@ -105,12 +126,8 @@ def calculate_fitness(BM_list: list[dict]) -> float:
     return score
 
 
-def copy_dict_list(dict_list: list[dict]) -> list[dict]:
-    return [dct.copy() for dct in dict_list]
-
-
 def variate(VM_list: list[dict]) -> list[dict]:
-    new_list = copy_dict_list(VM_list)
+    new_list = copy_VM_list(VM_list)
     indexes = [i for i in range(len(VM_list))]
     l = random.choices(indexes, k=2)
     new_list[l[0]], new_list[l[1]] = new_list[l[1]], new_list[l[0]]
@@ -123,12 +140,14 @@ def simulation_annealing(VM_list: list[dict]) -> tuple[bool, float, list[dict]]:
 
     return: 是否成功，评估分数，最优的分配后的BM_list
     """
-    BM_list = [BM.copy() for BM in BM_list_origin]
-    first_BM_list = [BM.copy() for BM in BM_list]
+    BM_list = copy_BM_list(BM_list_origin)
+    first_BM_list = copy_BM_list(BM_list)
+    # print(f'first_BM_list len: {len(first_BM_list)}, VM_list len: {len(VM_list)}')
     first_depatch = depatch_VM(first_BM_list, VM_list)
     if not first_depatch:
         return False, math.inf, []
-    bestScore, bestList = calculate_fitness(first_BM_list), copy_dict_list(first_BM_list)
+    bestScore, bestList = calculate_fitness(
+        first_BM_list), copy_BM_list(BM_list)
     adopted_score = bestScore
     adopted_VM_list = VM_list
 
@@ -137,7 +156,7 @@ def simulation_annealing(VM_list: list[dict]) -> tuple[bool, float, list[dict]]:
         # print(f'tem: {temperature}')
         temperature *= COLD_COEF
         new_VM_list = variate(adopted_VM_list)
-        new_BM_list = copy_dict_list(BM_list)
+        new_BM_list = copy_BM_list(BM_list)
         suc = depatch_VM(new_BM_list, new_VM_list)
         if not suc:
             continue
@@ -152,21 +171,40 @@ def simulation_annealing(VM_list: list[dict]) -> tuple[bool, float, list[dict]]:
 
 def SA_routine() -> list[dict]:
     VM_lists = []
-    VM_lists.append(sorted([VM.copy() for VM in VM_list_origin], key=lambda vm: vm['cpu_num']))
-    VM_lists.append(sorted([VM.copy() for VM in VM_list_origin], key=lambda vm: vm['storage']))
-    VM_lists.append(sorted([VM.copy() for VM in VM_list_origin], key=lambda vm: vm['memory']))
+    VM_lists.append(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['cpu_num']))
+    VM_lists.append(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['storage']))
+    VM_lists.append(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['memory']))
+    VM_lists.append(list(reversed(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['cpu_num']))))
+    VM_lists.append(list(reversed(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['storage']))))
+    VM_lists.append(list(reversed(sorted(copy_VM_list(VM_list_origin),
+                    key=lambda vm: vm['memory']))))
     for i in range(SHUFFLE_TIMES):
-        cur_list = [VM.copy() for VM in VM_list_origin]
+
+        cur_list = copy_VM_list(VM_list_origin)
         random.shuffle(cur_list)
         VM_lists.append(cur_list)
     result_list = []
-    for VM_list in VM_lists:
+    print(f'待选数量：', len(VM_lists))
+    for i, VM_list in enumerate(VM_lists):
+        print('scheduling:', i)
         suc, score, BM_list = simulation_annealing(VM_list)
-        # print(f'suc: {suc} score: {score}')
         if suc:
             result_list.append((score, BM_list))
+    if len(result_list) == 0:
+        return []
     best = min(result_list, key=lambda x: x[0])
+    # ssize = 0
+    # for BM in best[1]:
+    #     ssize += len(BM["vm_list"])
+    #     print(
+    #         f'name: {BM["name"]}, subsize: {len(BM["vm_list"])}, cpu_free: {BM["cpu_num_rem"]}, mem_free: {BM["memory_rem"]}, sto_free: {BM["storage_rem"]}')
+    #     print('vm_list: ')
+    #     print(BM['vm_list'])
+    # print(f'ssize: {ssize}')
+    
     return best[1]
-
-
-SA_routine()

@@ -1,5 +1,5 @@
 <template>
-    <div class="titleDiv">占用率</div>
+    <div class="titleDiv"></div>
     <div id="customGaugeContainer" ref="panel" style="height: 250px; width: 250px;"></div>
 </template>
 
