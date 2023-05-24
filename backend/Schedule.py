@@ -2,7 +2,7 @@ import math
 import pandas as pd
 import random
 
-SHUFFLE_TIMES = 3
+SHUFFLE_TIMES = 10
 START_TEMPERATURE = 100.0
 END_TEMPERATURE = 0.01
 COLD_COEF = 0.97

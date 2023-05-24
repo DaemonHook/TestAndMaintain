@@ -83,7 +83,7 @@ const CreateVMSymbolData = (x, y, VM) => {
         symbol: 'circle',
         symbolSize: VMSymbolSize,
         itemStyle: {
-            color: '#ef5b9c',
+            color: '#d7134590',
             borderColor: '#ffffff40',
             borderWidth: 3
         },
